@@ -14,6 +14,14 @@
 		"pip": {
 			"packages": [
 				{
+					"name": "hdmf-zarr",
+					"version": "0.11.0"
+				},
+				{
+					"name": "pynwb",
+					"version": "3.0.0"
+				},
+				{
 					"name": "s3fs",
 					"version": "2025.3.0"
 				}

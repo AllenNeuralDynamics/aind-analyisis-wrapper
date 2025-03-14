@@ -1,4 +1,4 @@
-# hash:sha256:03b54552fac2c7903ff7f0509a108ef10d1b6f3e87c9a3c2a00df706a358c58c
+# hash:sha256:3019eccf54b7a7851773bb0884fe5572439b4e5df887dc6d0b373b4329bd5de2
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/jupyterlab:3.6.1-miniconda4.12.0-python3.9-ubuntu20.04
 
@@ -12,6 +12,8 @@ ARG GIT_ACCESS_TOKEN
 COPY git-askpass /
 
 RUN pip install -U --no-cache-dir \
+    hdmf-zarr==0.11.0 \
+    pynwb==3.0.0 \
     s3fs==2025.3.0
 
 ADD "https://github.com/coder/code-server/releases/download/v4.95.3/code-server-4.95.3-linux-amd64.tar.gz" /.code-server/code-server.tar.gz
