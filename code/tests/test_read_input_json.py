@@ -1,7 +1,8 @@
-import unittest
-from unittest.mock import patch, MagicMock
 import json
 import pathlib
+import unittest
+from unittest.mock import MagicMock, patch
+
 from analysis_wrapper.utils import read_input_json
 
 
@@ -18,13 +19,9 @@ class TestReadInputJson(unittest.TestCase):
             MagicMock()
         )  # Simulate the open context manager
         mock_json_load.return_value = {
-            "s3_location": "s3://codeocean-s3datasetsbucket-1u41qdg42ur9/7f1eaf10-01bc-41cb-bc88-6464d0425b51/nwb/behavior_769038_2025-02-10_13-16-09.nwb",
-            "analysis_spec": {
-                "analysis_name": "Unit_yield",
-                "analysis_version": "0.1.0",
-                "analysis_libraries_to_track": ["aind-ephys-utils"],
-                "analysis_parameters": {"alpha": 0.1},
-            },
+            "location_bucket": "s3://s3://codeocean-s3datasetsbucket-1u41qdg42ur9/7f1eaf10-01bc-41cb-bc88-6464d0425b51",
+            "location_asset_id": "7f1eaf10-01bc-41cb-bc88-6464d0425b51",
+            "location_uri": "s3://codeocean-s3datasetsbucket-1u41qdg42ur9/7f1eaf10-01bc-41cb-bc88-6464d0425b51/nwb/behavior_769038_2025-02-10_13-16-09.nwb",
         }  # Simulate the JSON content
 
         # Call the function
@@ -34,13 +31,9 @@ class TestReadInputJson(unittest.TestCase):
         self.assertEqual(
             result,
             {
-                "s3_location": "s3://codeocean-s3datasetsbucket-1u41qdg42ur9/7f1eaf10-01bc-41cb-bc88-6464d0425b51/nwb/behavior_769038_2025-02-10_13-16-09.nwb",
-                "analysis_spec": {
-                    "analysis_name": "Unit_yield",
-                    "analysis_version": "0.1.0",
-                    "analysis_libraries_to_track": ["aind-ephys-utils"],
-                    "analysis_parameters": {"alpha": 0.1},
-                },
+                "location_bucket": "s3://s3://codeocean-s3datasetsbucket-1u41qdg42ur9/7f1eaf10-01bc-41cb-bc88-6464d0425b51",
+                "location_asset_id": "7f1eaf10-01bc-41cb-bc88-6464d0425b51",
+                "location_uri": "s3://codeocean-s3datasetsbucket-1u41qdg42ur9/7f1eaf10-01bc-41cb-bc88-6464d0425b51/nwb/behavior_769038_2025-02-10_13-16-09.nwb",
             },
         )
 
