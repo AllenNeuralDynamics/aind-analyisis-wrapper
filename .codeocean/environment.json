@@ -1,6 +1,6 @@
 {
 	"version": 1,
-	"base_image": "codeocean/jupyterlab:3.6.1-miniconda4.12.0-python3.9-ubuntu20.04",
+	"base_image": "codeocean/mambaforge3:24.5.0-0-python3.12.4-ubuntu22.04",
 	"args": [
 		"AWS_ACCESS_KEY_ID",
 		"AWS_DEFAULT_REGION",
@@ -13,6 +13,10 @@
 	"installers": {
 		"pip": {
 			"packages": [
+				{
+					"name": "git+https://github.com/AllenNeuralDynamics/aind-analysis-results.git#egg=aind-analysis-results",
+					"version": "aee783f3a70fc27326fa15f83e738305f5c7e8a4"
+				},
 				{
 					"name": "hdmf-zarr",
 					"version": "0.11.0"
