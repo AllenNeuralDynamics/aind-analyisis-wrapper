@@ -45,8 +45,12 @@ class AnalysisSpecification(BaseModel):
         ..., title="The output bucket where the results will be written to."
     )
 
-class AnalysisSpecificationCLI(AnalysisSpecification, BaseSettings, cli_parse_args=True):
+
+class AnalysisSpecificationCLI(
+    AnalysisSpecification, BaseSettings, cli_parse_args=True
+):
     """
     For command line argument parsing
     """
+
     pass
