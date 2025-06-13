@@ -30,7 +30,7 @@
 			"id": "c6yoIOFdLVWZcY5j",
 			"name": "analysis parameters",
 			"param_name": "analysis_parameters",
-			"description": "The parameters that the analysis will use. Pass in as dict where key is parameter",
+			"description": "The parameters that the analysis functions will use. Pass in as dict where key is parameter",
 			"type": "text",
 			"value_type": "string"
 		},
