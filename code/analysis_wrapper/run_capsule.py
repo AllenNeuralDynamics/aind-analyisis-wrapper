@@ -19,6 +19,7 @@ def run_analysis(analysis_job_dict: dict) -> None:
         processing, analysis_job_dict["parameters"]["s3_output_bucket"]
     )
     metadata.write_to_docdb(processing_updated)
+    logger.info(f"Successfully wrote record to docdb and s3 to path {processing.output_path}")
 
 
 if __name__ == "__main__":
@@ -44,7 +45,7 @@ if __name__ == "__main__":
     logger.info(f"Analysis Specification: {analysis_specs}")
 
     for specification in analysis_specs:
-        analysis_specification = AnalysisSpecification.model_validate(specification).model_dump_json()
+        analysis_specification = AnalysisSpecification.model_validate(specification).model_dump()
         logger.info(f"Running analysis with specification {analysis_specification} and input data {analysis_job_dict['asset_name']}")
         analysis_job_dict["parameters"] = analysis_specification
         run_analysis(analysis_job_dict)
