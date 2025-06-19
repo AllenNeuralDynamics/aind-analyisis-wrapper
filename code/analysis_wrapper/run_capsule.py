@@ -1,3 +1,4 @@
+import json
 import logging
 
 import aind_analysis_results.files as files
@@ -27,14 +28,19 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-    analysis_job_dict = utils.read_input_json("job_dict")
+    input_model_paths = tuple(utils.DATA_PATH.glob('job_dict/*'))
+    logger.info(f"Found f{len(input_model_paths)} input job models to run analysis on.")
     analysis_specs = None
-    try:
-        analysis_specs = utils.read_input_json("analysis_parameters")
+
+    analysis_spec_path = tuple(utils.DATA_PATH.glob("analysis_parameters.json"))
+    if analysis_spec_path:
+        with open(analysis_spec_path[0], "r") as f:
+            analysis_specs = json.load(f)
+
         logger.info(
             "Found analysis specification json. Parsing list of analysis specifications"
         )
-    except FileNotFoundError as e:
+    else:
         logger.info(
             "No analysis parameters json found. Defaulting to parameters passed in via input arguments"
         )
@@ -44,8 +50,12 @@ if __name__ == "__main__":
 
     logger.info(f"Analysis Specification: {analysis_specs}")
 
-    for specification in analysis_specs:
-        analysis_specification = AnalysisSpecification.model_validate(specification).model_dump()
-        logger.info(f"Running analysis with specification {analysis_specification} and input data {analysis_job_dict['asset_name']}")
-        analysis_job_dict["parameters"] = analysis_specification
-        run_analysis(analysis_job_dict)
+    for model_path in input_model_paths:
+        with open(model_path, "r") as f:
+            analysis_job_dict = json.load(f)
+        
+        for specification in analysis_specs:
+            analysis_specification = AnalysisSpecification.model_validate(specification).model_dump()
+            logger.info(f"Running analysis with specification {analysis_specification} and input data {analysis_job_dict['asset_name']}")
+            analysis_job_dict["parameters"] = analysis_specification
+            run_analysis(analysis_job_dict)
