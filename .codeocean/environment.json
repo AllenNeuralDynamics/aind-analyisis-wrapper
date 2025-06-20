@@ -5,8 +5,7 @@
 		"AWS_ACCESS_KEY_ID",
 		"AWS_DEFAULT_REGION",
 		"AWS_SECRET_ACCESS_KEY",
-		"CODEOCEAN_API_TOKEN",
-		"CODEOCEAN_DOMAIN"
+		"CODEOCEAN_API_TOKEN"
 	],
 	"post_install": true,
 	"options": {
@@ -40,6 +39,10 @@
 		{
 			"name": "DOCDB_COLLECTION",
 			"value": "processing_v2"
+		},
+		{
+			"name": "CODEOCEAN_DOMAIN",
+			"value": "https://codeocean.allenneuraldynamics.org/"
 		}
 	]
 }
