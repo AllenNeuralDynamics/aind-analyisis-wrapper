@@ -1,4 +1,4 @@
-# hash:sha256:c4b95acb0af5938649126d3219dd0773d35c6a5109df53a85f33c008e68dd71c
+# hash:sha256:c84acf04530416d6ee33406bfe6ae3480b9e4037e6bd65a3716934164d6b98ca
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/mambaforge3:24.5.0-0-python3.12.4-ubuntu22.04
 
@@ -19,7 +19,7 @@ ENV CODEOCEAN_DOMAIN=https://codeocean.allenneuraldynamics.org/
 
 RUN pip install -U --no-cache-dir \
     pydantic-settings==2.9.1 \
-    -e git+https://github.com/AllenNeuralDynamics/aind-analysis-results.git#egg=aind-analysis-results
+    -e git+https://github.com/AllenNeuralDynamics/aind-analysis-results.git@14df02b6909085f00cbb58d01a66a2c85e5cef6e#egg=aind-analysis-results
 
 COPY postInstall /
 RUN /postInstall

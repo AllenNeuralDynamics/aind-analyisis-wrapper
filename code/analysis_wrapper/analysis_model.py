@@ -18,33 +18,18 @@ class AnalysisSpecification(BaseModel):
     analysis_name : str
         The name of the analysis function that will be run.
 
-    analysis_version : str
-        The version of the analysis to run.
-
-    analysis_libraries : List[str]
-        A list of libraries to track that will be used in the analysis.
-
-    analysis_parameters : dict, optional
-        A dictionary of user-defined input parameters that the analysis
-        function will use. Defaults to an empty dictionary.
-
-    s3_output_bucket: str
-        The output bucket to write the results to
+    analysis_tag : str
+        User defined tag to organize results for querying analysis output.
+    
+    analysis_parameters: Optional[AnalysisParameters]
+        Additional parameters for analysis, specified in the sub model where each parameter is a field in the model
     """
 
     analysis_name: str = Field(..., title="The analysis function that will be run")
-    analysis_version: str = Field(..., title="The version of the analysis to run")
-    analysis_libraries: List[str] = Field(
-        ..., title="The analysis libraries that will be used"
+    analysis_tag: str = Field(..., title="User defined tag to organize results for querying analysis output")
+    isi_violations_cutoff: float = Field(
+         ..., title="The value to be using when filtering units by this"
     )
-    analysis_parameters: dict = Field(
-        default={},
-        title="The user defined input parameters that the analysis function will use",
-    )
-    s3_output_bucket: str = Field(
-        ..., title="The output bucket where the results will be written to."
-    )
-
 
 class AnalysisSpecificationCLI(
     AnalysisSpecification, BaseSettings, cli_parse_args=True

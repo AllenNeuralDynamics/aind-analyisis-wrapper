@@ -7,6 +7,7 @@ import analysis_wrapper.utils as utils
 from analysis_wrapper.analysis_model import (AnalysisSpecification,
                                              AnalysisSpecificationCLI)
 
+S3_PATH_TO_BUCKET = None # REPLACE WITH DESIRED PATH
 logger = logging.getLogger(__name__)
 
 
@@ -16,8 +17,17 @@ def run_analysis(analysis_job_dict: dict) -> None:
         return
 
     ### Execute analysis and write to results folder
+    ### SEE EXAMPLE BELOW
+    # Use NWBZarrIO to read
+    # with NWBZarrIO(s3_url, 'r') as io:
+    #     nwbfile = io.read()
+    
+    # acquisition_keys = list(nwbfile.acquisition.keys())
+    # with open('/results/acquisition_keys.json', 'w') as f:
+    #     json.dump(acquisition_keys, f)
+        
     processing_updated = files.copy_results_to_s3(
-        processing, analysis_job_dict["parameters"]["s3_output_bucket"]
+        processing, 
     )
     metadata.write_to_docdb(processing_updated)
     logger.info(f"Successfully wrote record to docdb and s3 to path {processing.output_path}")
@@ -45,8 +55,9 @@ if __name__ == "__main__":
             "No analysis parameters json found. Defaulting to parameters passed in via input arguments"
         )
 
-    if analysis_specs is None:
-        analysis_specs = [AnalysisSpecificationCLI().model_dump_json()]
+    ### WAY TO PARSE FROM USER DEFINED APP PANEL
+    # if analysis_specs is None:
+    #     analysis_specs = [AnalysisSpecificationCLI().model_dump_json()]
 
     logger.info(f"Analysis Specification: {analysis_specs}")
 
