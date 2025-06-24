@@ -1,24 +1,25 @@
 import json
 import logging
 
-import aind_analysis_results.files as files
-import aind_analysis_results.metadata as metadata
+from aind_analysis_results.metadata import construct_processing_record, docdb_record_exists, write_results_and_metadata
+from aind_analysis_results.analysis_dispatch_model import AnalysisDispatchModel
 import analysis_wrapper.utils as utils
-from analysis_wrapper.analysis_model import (AnalysisSpecification,
-                                             AnalysisSpecificationCLI)
+from analysis_wrapper.example_analysis_model import (ExampleAnalysisSpecification,
+                                             ExampleAnalysisSpecificationCLI)
 
 S3_PATH_TO_BUCKET = None # REPLACE WITH DESIRED PATH
 logger = logging.getLogger(__name__)
 
 
-def run_analysis(analysis_job_dict: dict) -> None:
-    processing = metadata.construct_processing_record(analysis_job_dict)
-    if metadata.docdb_record_exists(processing):
+def run_analysis(analysis_dispatch_inputs: AnalysisDispatchModel, **parameters) -> None:
+    processing = construct_processing_record(analysis_dispatch_inputs, **parameters)
+    if docdb_record_exists(processing):
         return
 
     ### Execute analysis and write to results folder
+    ### using the passed parameters
     ### SEE EXAMPLE BELOW
-    # Use NWBZarrIO to read
+    # Use NWBZarrIO to reads
     # with NWBZarrIO(s3_url, 'r') as io:
     #     nwbfile = io.read()
     
@@ -26,10 +27,7 @@ def run_analysis(analysis_job_dict: dict) -> None:
     # with open('/results/acquisition_keys.json', 'w') as f:
     #     json.dump(acquisition_keys, f)
         
-    processing_updated = files.copy_results_to_s3(
-        processing, 
-    )
-    metadata.write_to_docdb(processing_updated)
+    write_results_and_metadata(process, ANALYSIS_BUCKET)
     logger.info(f"Successfully wrote record to docdb and s3 to path {processing.output_path}")
 
 
@@ -39,7 +37,7 @@ if __name__ == "__main__":
     )
 
     input_model_paths = tuple(utils.DATA_PATH.glob('job_dict/*'))
-    logger.info(f"Found f{len(input_model_paths)} input job models to run analysis on.")
+    logger.info(f"Found {len(input_model_paths)} input job models to run analysis on.")
     analysis_specs = None
 
     analysis_spec_path = tuple(utils.DATA_PATH.glob("analysis_parameters.json"))
@@ -57,16 +55,14 @@ if __name__ == "__main__":
 
     ### WAY TO PARSE FROM USER DEFINED APP PANEL
     # if analysis_specs is None:
-    #     analysis_specs = [AnalysisSpecificationCLI().model_dump_json()]
+    #     analysis_specs = ExampleAnalysisSpecificationCLI().model_dump_json()
 
     logger.info(f"Analysis Specification: {analysis_specs}")
 
     for model_path in input_model_paths:
         with open(model_path, "r") as f:
-            analysis_job_dict = json.load(f)
+            analysis_dispatch_inputs = AnalysisDispatchModel.model_validate(json.load(f))
         
-        for specification in analysis_specs:
-            analysis_specification = AnalysisSpecification.model_validate(specification).model_dump()
-            logger.info(f"Running analysis with specification {analysis_specification} and input data {analysis_job_dict['asset_name']}")
-            analysis_job_dict["parameters"] = analysis_specification
-            run_analysis(analysis_job_dict)
+        analysis_specification = ExampleAnalysisSpecification.model_validate(analysis_specs).model_dump()
+        logger.info(f"Running analysis with specification {analysis_specification} and input data {analysis_job_dict['asset_name']}")
+        run_analysis(analysis_dispatch_inputs, **analysis_specification)

@@ -17,11 +17,15 @@
 			"packages": [
 				{
 					"name": "git+https://github.com/AllenNeuralDynamics/aind-analysis-results.git#egg=aind-analysis-results",
-					"version": "14df02b6909085f00cbb58d01a66a2c85e5cef6e"
+					"version": "c64c0526d3b6ed4b8a1aa9334698a810b560607d"
 				},
 				{
 					"name": "pydantic-settings",
 					"version": "2.9.1"
+				},
+				{
+					"name": "s3fs",
+					"version": "0.4.2"
 				}
 			],
 			"options": {},
@@ -44,6 +48,10 @@
 		{
 			"name": "CODEOCEAN_DOMAIN",
 			"value": "https://codeocean.allenneuraldynamics.org/"
+		},
+		{
+			"name": "CODEOCEAN_EMAIL",
+			"value": "tom.chartrand@alleninstitute.org"
 		}
 	]
 }
