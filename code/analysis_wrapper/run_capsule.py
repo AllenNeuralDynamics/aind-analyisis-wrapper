@@ -7,7 +7,7 @@ import analysis_wrapper.utils as utils
 from analysis_wrapper.example_analysis_model import (ExampleAnalysisSpecification,
                                              ExampleAnalysisSpecificationCLI)
 
-S3_PATH_TO_BUCKET = None # REPLACE WITH DESIRED PATH
+ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
 logger = logging.getLogger(__name__)
 
 

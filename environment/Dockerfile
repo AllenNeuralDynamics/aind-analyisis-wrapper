@@ -1,4 +1,4 @@
-# hash:sha256:11ac7780f6a3afae77b8bafc8a779386f26ef25d0cdc43b49a28c6b48c8be474
+# hash:sha256:26e30dd344ad37b1b28db38c5cd0c59dc984725605556026b2a3b14e973e2a38
 ARG REGISTRY_HOST
 FROM $REGISTRY_HOST/codeocean/mambaforge3:24.5.0-0-python3.12.4-ubuntu22.04
 
@@ -17,6 +17,7 @@ ENV DOCDB_DATABASE=analysis
 ENV DOCDB_COLLECTION=processing_v2
 ENV CODEOCEAN_DOMAIN=https://codeocean.allenneuraldynamics.org/
 ENV CODEOCEAN_EMAIL=tom.chartrand@alleninstitute.org
+ENV ANALYSIS_BUCKET=s3://aind-scratch-data
 
 RUN pip install -U --no-cache-dir \
     pydantic-settings==2.9.1 \

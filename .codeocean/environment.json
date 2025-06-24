@@ -52,6 +52,10 @@
 		{
 			"name": "CODEOCEAN_EMAIL",
 			"value": "tom.chartrand@alleninstitute.org"
+		},
+		{
+			"name": "ANALYSIS_BUCKET",
+			"value": "s3://aind-scratch-data"
 		}
 	]
 }
