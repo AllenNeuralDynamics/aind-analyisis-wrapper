@@ -17,7 +17,7 @@
 			"packages": [
 				{
 					"name": "git+https://github.com/AllenNeuralDynamics/aind-analysis-results.git#egg=aind-analysis-results",
-					"version": "c64c0526d3b6ed4b8a1aa9334698a810b560607d"
+					"version": "31d93fe687dee8a175eb38051d1710937b2f7e34"
 				},
 				{
 					"name": "pydantic-settings",
@@ -35,7 +35,7 @@
 	"env_variables": [
 		{
 			"name": "DOCDB_HOST",
-			"value": "api.allenneuraldynamics-test.org"
+			"value": "api.allenneuraldynamics.org"
 		},
 		{
 			"name": "DOCDB_DATABASE",
@@ -43,11 +43,11 @@
 		},
 		{
 			"name": "DOCDB_COLLECTION",
-			"value": "processing_v2"
+			"value": "architecture_example_v2"
 		},
 		{
 			"name": "CODEOCEAN_DOMAIN",
-			"value": "https://codeocean.allenneuraldynamics.org/"
+			"value": "codeocean.allenneuraldynamics.org"
 		},
 		{
 			"name": "CODEOCEAN_EMAIL",
@@ -55,7 +55,7 @@
 		},
 		{
 			"name": "ANALYSIS_BUCKET",
-			"value": "s3://aind-scratch-data"
+			"value": "aind-scratch-data/analysis/architecture_example_v2"
 		}
 	]
 }

@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 
 from aind_analysis_results.metadata import construct_processing_record, docdb_record_exists, write_results_and_metadata
 from aind_analysis_results.analysis_dispatch_model import AnalysisDispatchModel
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 def run_analysis(analysis_dispatch_inputs: AnalysisDispatchModel, **parameters) -> None:
     processing = construct_processing_record(analysis_dispatch_inputs, **parameters)
     if docdb_record_exists(processing):
+        logger.info("Record already exists, skipping.")
         return
 
     ### Execute analysis and write to results folder
@@ -27,10 +29,12 @@ def run_analysis(analysis_dispatch_inputs: AnalysisDispatchModel, **parameters) 
     # with open('/results/acquisition_keys.json', 'w') as f:
     #     json.dump(acquisition_keys, f)
         
-    write_results_and_metadata(process, ANALYSIS_BUCKET)
-    logger.info(f"Successfully wrote record to docdb and s3 to path {processing.output_path}")
+    write_results_and_metadata(processing, ANALYSIS_BUCKET)
+    logger.info(f"Successfully wrote record to docdb and s3")
 
 
+# Most of the below code will not need to change per-analysis
+# and will be moved to a shared library
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
@@ -64,5 +68,4 @@ if __name__ == "__main__":
             analysis_dispatch_inputs = AnalysisDispatchModel.model_validate(json.load(f))
         
         analysis_specification = ExampleAnalysisSpecification.model_validate(analysis_specs).model_dump()
-        logger.info(f"Running analysis with specification {analysis_specification} and input data {analysis_job_dict['asset_name']}")
         run_analysis(analysis_dispatch_inputs, **analysis_specification)
