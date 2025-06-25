@@ -22,8 +22,9 @@ def run_analysis(analysis_dispatch_inputs: AnalysisDispatchModel, **parameters) 
     ### using the passed parameters
     ### SEE EXAMPLE BELOW
     # Use NWBZarrIO to reads
-    # with NWBZarrIO(s3_url, 'r') as io:
-    #     nwbfile = io.read()
+    # for location in analysis_dispatch_inputs.file_location:
+    #     with NWBZarrIO(location, 'r') as io:
+    #         nwbfile = io.read()
     
     # acquisition_keys = list(nwbfile.acquisition.keys())
     # with open('/results/acquisition_keys.json', 'w') as f:
