@@ -1,5 +1,6 @@
 {
 	"version": 1,
+<<<<<<< feat-analysis-wrapper
 	"base_image": "codeocean/mambaforge3:24.5.0-0-python3.12.4-ubuntu22.04",
 	"args": [
 		"AWS_ACCESS_KEY_ID",
@@ -57,4 +58,10 @@
 			"value": "aind-scratch-data/analysis/architecture_example_v2"
 		}
 	]
+=======
+	"base_image": "codeocean/jupyterlab:3.0.9-miniconda4.9.2-python3.8-ubuntu20.04",
+	"options": {
+		"git_ask_pass": true
+	}
+>>>>>>> main
 }
