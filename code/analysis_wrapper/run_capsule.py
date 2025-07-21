@@ -1,14 +1,16 @@
 import json
 import logging
 import os
+from pathlib import Path
+from typing import Any
 
 from aind_analysis_results.metadata import construct_processing_record, docdb_record_exists, write_results_and_metadata
 from aind_analysis_results.analysis_dispatch_model import AnalysisDispatchModel
-import analysis_wrapper.utils as utils
 from analysis_wrapper.example_analysis_model import (
     ExampleAnalysisSpecification, ExampleAnalysisSpecificationCLI, ExampleAnalysisOutputs
 )
 
+DATA_PATH = Path("/data") # TODO: don't hardcode 
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
 logger = logging.getLogger(__name__)
 
@@ -46,32 +48,46 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-    input_model_paths = tuple(utils.DATA_PATH.glob('job_dict/*'))
+    input_model_paths = tuple(DATA_PATH.glob('job_dict/*'))
     logger.info(f"Found {len(input_model_paths)} input job models to run analysis on.")
-    analysis_specs = None
+    analysis_model_from_json = None
+    analysis_spec = None
 
-    analysis_spec_path = tuple(utils.DATA_PATH.glob("analysis_parameters.json"))
+    analysis_spec_path = tuple(DATA_PATH.glob("analysis_parameters.json"))
     if analysis_spec_path:
         with open(analysis_spec_path[0], "r") as f:
-            analysis_specs = json.load(f)
+            analysis_spec = json.load(f)
 
         logger.info(
-            "Found analysis specification json. Parsing list of analysis specifications"
+            "Found analysis specification json. Parsing it"
         )
     else:
         logger.info(
             "No analysis parameters json found. Defaulting to parameters passed in via input arguments"
         )
 
-    ### WAY TO PARSE FROM USER DEFINED APP PANEL
-    # if analysis_specs is None:
-    #     analysis_specs = ExampleAnalysisSpecificationCLI().model_dump_json()
+    if analysis_spec is not None:
+        analysis_dict_from_json = ExampleAnalysisSpecification(**analysis_spec).model_construct().model_dump()
+    else:
+        analysis_dict_from_json = {}
 
-    logger.info(f"Analysis Specification: {analysis_specs}")
+    analysis_model_cli = ExampleAnalysisSpecificationCLI()
+    cli_data = analysis_model_cli.model_dump()
+
+    logger.info(f"Analysis Specification: {analysis_spec}")
 
     for model_path in input_model_paths:
         with open(model_path, "r") as f:
             analysis_dispatch_inputs = AnalysisDispatchModel.model_validate(json.load(f))
         
-        analysis_specification = ExampleAnalysisSpecification.model_validate(analysis_specs).model_dump()
+        if analysis_dispatch_inputs.distributed_parameters:
+            logger.info("Found distributed parameters from dispatch. Will combine, with distributed parameters taking priority")
+            distributed_parameters = analysis_dispatch_inputs.distributed_parameters
+        else:
+            distributed_parameters = {}
+        
+        # Combine parameters - priority: json < command line < distributed parameters
+        merged_parameters = {**analysis_dict_from_json, **cli_data, **distributed_parameters} 
+        analysis_specification = ExampleAnalysisSpecification.model_validate(merged_parameters).model_dump()
+        logger.info(f"Running with analysis specs {analysis_specification}")
         run_analysis(analysis_dispatch_inputs, **analysis_specification)
