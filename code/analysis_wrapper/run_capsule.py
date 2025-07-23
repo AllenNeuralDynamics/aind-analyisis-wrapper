@@ -4,13 +4,17 @@ import os
 from pathlib import Path
 
 from aind_analysis_results.analysis_dispatch_model import AnalysisDispatchModel
-from aind_analysis_results.metadata import (construct_processing_record,
-                                            docdb_record_exists,
-                                            write_results_and_metadata)
+from aind_analysis_results.metadata import (
+    construct_processing_record,
+    docdb_record_exists,
+    write_results_and_metadata,
+)
 
 from analysis_wrapper.example_analysis_model import (
-    ExampleAnalysisOutputs, ExampleAnalysisSpecification,
-    ExampleAnalysisSpecificationCLI)
+    ExampleAnalysisOutputs,
+    ExampleAnalysisSpecification,
+    ExampleAnalysisSpecificationCLI,
+)
 
 DATA_PATH = Path("/data")  # TODO: don't hardcode
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
