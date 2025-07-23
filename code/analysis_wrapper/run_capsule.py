@@ -64,30 +64,31 @@ if __name__ == "__main__":
     analysis_spec = None
 
     analysis_spec_path = tuple(DATA_PATH.glob("analysis_parameters.json"))
+    fixed_parameters = {}
     if analysis_spec_path:
         with open(analysis_spec_path[0], "r") as f:
             analysis_spec = json.load(f)
-
-        logger.info("Found analysis specification json. Parsing it")
+            if "fixed_parameters" in analysis_spec:
+                fixed_parameters = analysis_spec["fixed_parameters"]
+                logger.info("Found analysis specification json. Parsing it")
+                logger.info(f"Found fixed parameters {fixed_parameters}")
     else:
         logger.info(
             "No analysis parameters json found. "
             "Defaulting to parameters passed in via input arguments"
         )
 
-    if analysis_spec is not None:
-        analysis_dict_from_json = (
-            ExampleAnalysisSpecification(**analysis_spec)
+    if fixed_parameters:
+        fixed_parameters_model = (
+            ExampleAnalysisSpecification(**fixed_parameters)
             .model_construct()
             .model_dump()
         )
     else:
-        analysis_dict_from_json = {}
+        fixed_parameters_model = {}
 
     analysis_model_cli = ExampleAnalysisSpecificationCLI()
     cli_data = analysis_model_cli.model_dump()
-
-    logger.info(f"Analysis Specification: {analysis_spec}")
 
     for model_path in input_model_paths:
         with open(model_path, "r") as f:
@@ -107,9 +108,9 @@ if __name__ == "__main__":
             distributed_parameters = {}
 
         # Combine parameters - priority:
-        # json < command line < distributed parameters
+        # fixed parameters json < command line < distributed parameters
         merged_parameters = {
-            **analysis_dict_from_json,
+            **fixed_parameters_model,
             **cli_data,
             **distributed_parameters,
         }
