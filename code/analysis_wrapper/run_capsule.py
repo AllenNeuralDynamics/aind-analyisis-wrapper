@@ -4,17 +4,12 @@ import os
 from pathlib import Path
 
 from aind_analysis_results.analysis_dispatch_model import AnalysisDispatchModel
-from aind_analysis_results.metadata import (
-    construct_processing_record,
-    docdb_record_exists,
-    write_results_and_metadata,
-)
+from aind_analysis_results.metadata import (construct_processing_record,
+                                            docdb_record_exists,
+                                            write_results_and_metadata)
 
-from analysis_wrapper.example_analysis_model import (
-    ExampleAnalysisOutputs,
-    ExampleAnalysisSpecification,
-    ExampleAnalysisSpecificationCLI,
-)
+import analysis_wrapper.utils as utils
+from analysis_wrapper.example_analysis_model import ExampleAnalysisSpecification, ExampleAnalysisOutputs
 
 DATA_PATH = Path("/data")  # TODO: don't hardcode
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
@@ -64,60 +59,15 @@ if __name__ == "__main__":
     logger.info(
         f"Found {len(input_model_paths)} input job models to run analysis on."
     )
-    analysis_model_from_json = None
-    analysis_spec = None
-
-    analysis_spec_path = tuple(DATA_PATH.glob("analysis_parameters.json"))
-    fixed_parameters = {}
-    if analysis_spec_path:
-        with open(analysis_spec_path[0], "r") as f:
-            analysis_spec = json.load(f)
-            if "fixed_parameters" in analysis_spec:
-                fixed_parameters = analysis_spec["fixed_parameters"]
-                logger.info("Found analysis specification json. Parsing it")
-                logger.info(f"Found fixed parameters {fixed_parameters}")
-    else:
-        logger.info(
-            "No analysis parameters json found. "
-            "Defaulting to parameters passed in via input arguments"
-        )
-
-    if fixed_parameters:
-        fixed_parameters_model = (
-            ExampleAnalysisSpecification(**fixed_parameters)
-            .model_construct()
-            .model_dump()
-        )
-    else:
-        fixed_parameters_model = {}
-
-    analysis_model_cli = ExampleAnalysisSpecificationCLI()
-    cli_data = analysis_model_cli.model_dump()
 
     for model_path in input_model_paths:
         with open(model_path, "r") as f:
             analysis_dispatch_inputs = AnalysisDispatchModel.model_validate(
                 json.load(f)
             )
-
-        if analysis_dispatch_inputs.distributed_parameters:
-            logger.info(
-                "Found distributed parameters from dispatch. "
-                "Will combine, with distributed parameters taking priority"
-            )
-            distributed_parameters = (
-                analysis_dispatch_inputs.distributed_parameters
-            )
-        else:
-            distributed_parameters = {}
-
-        # Combine parameters - priority:
-        # fixed parameters json < command line < distributed parameters
-        merged_parameters = {
-            **fixed_parameters_model,
-            **cli_data,
-            **distributed_parameters,
-        }
+        merged_parameters = utils.get_analysis_model_parameters(
+             analysis_dispatch_inputs, ExampleAnalysisSpecification, input_path=DATA_PATH
+        )
         analysis_specification = ExampleAnalysisSpecification.model_validate(
             merged_parameters
         ).model_dump()
