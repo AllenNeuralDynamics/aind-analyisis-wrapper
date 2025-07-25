@@ -9,7 +9,7 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
-class AnalysisSpecification(GenericModel):
+class ExampleAnalysisSpecification(GenericModel):
     """
     Represents the specification for an analysis, including its name,
     version, libraries to track, and parameters.
@@ -21,7 +21,7 @@ class AnalysisSpecification(GenericModel):
          ..., description="The value to be using when filtering units by this"
     )
 
-class AnalysisOutputs(GenericModel):
+class ExampleAnalysisOutputs(GenericModel):
     """
     Represents the outputs of an analysis, including a list of ISI violations.
     """
@@ -33,8 +33,8 @@ class AnalysisOutputs(GenericModel):
         default=None, description="Additional information about the analysis"
     )
 
-class AnalysisSpecificationCLI(
-    AnalysisSpecification, BaseSettings, cli_parse_args=True
+class ExampleAnalysisSpecificationCLI(
+    ExampleAnalysisSpecification, BaseSettings, cli_parse_args=True
 ):
     """
     This class is needed only if you want to parse settings passed from the command line (including the app builder)
