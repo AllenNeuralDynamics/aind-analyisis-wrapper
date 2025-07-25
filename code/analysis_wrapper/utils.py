@@ -111,7 +111,7 @@ def _get_merged_analysis_parameters(
 def get_analysis_model_parameters(
     analysis_dispatch_inputs: AnalysisDispatchModel,
     analysis_model: GenericModel,
-    input_path: Union[Path, None] = None,
+    analysis_parameters_json_path: Union[Path, None] = None,
 ) -> dict[str, Any]:
     """
     Gets the analysis parameters for metadata and tracking
@@ -124,18 +124,17 @@ def get_analysis_model_parameters(
     analysis_model: GenericModel
         The analysis model with user defined parameters
         
-    input_path: Union[Path, None] = None
-        The path to folder contaning analysis_parameters.json file if passed in
+    analysis_parameters_json_path: Union[Path, None] = None
+        The path to analysis_parameters.json file
 
     Returns
     -------
     dict[str, Any]
         The merged analysis parameters 
     """
-    analysis_spec_path = tuple(input_path.glob("analysis_parameters.json"))
     fixed_parameters = {}
-    if analysis_spec_path:
-        with open(analysis_spec_path[0], "r") as f:
+    if analysis_parameters_json_path.exists():
+        with open(analysis_parameters_json_path, "r") as f:
             analysis_spec = json.load(f)
             if "fixed_parameters" in analysis_spec:
                 fixed_parameters = analysis_spec["fixed_parameters"]

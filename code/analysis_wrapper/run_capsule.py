@@ -66,7 +66,8 @@ if __name__ == "__main__":
                 json.load(f)
             )
         merged_parameters = utils.get_analysis_model_parameters(
-             analysis_dispatch_inputs, ExampleAnalysisSpecification, input_path=DATA_PATH
+             analysis_dispatch_inputs, ExampleAnalysisSpecification, 
+             analysis_parameters_json_path=DATA_PATH / "analysis_parameters.json"
         )
         analysis_specification = ExampleAnalysisSpecification.model_validate(
             merged_parameters
