@@ -19,9 +19,9 @@ The analysis wrapper:
 
 - **Job Input Model**: A standardized JSON structure (`AnalysisDispatchModel`) that contains S3 file locations, asset IDs, and analysis parameters for a specific dataset.
 
-- **Analysis Specification**: A user-defined schema (`AnalysisSpecification`) that defines the parameters your analysis requires (e.g., filtering thresholds, algorithm settings).
+- **Analysis Specification**: A user-defined schema (`ExampleAnalysisSpecification`) that defines the parameters your analysis requires (e.g., filtering thresholds, algorithm settings).
 
-- **Analysis Outputs**: A structured format (`AnalysisOutputs`) for your analysis results that will be saved and tracked.
+- **Analysis Outputs**: A structured format (`ExampleAnalysisOutputs`) for your analysis results that will be saved and tracked.
 
 - **Processing Record**: Comprehensive metadata about the analysis execution, including input data, parameters, code version, timestamps, and output locations.
 
@@ -75,15 +75,7 @@ Configure the following environment variables in your duplicated Code Ocean caps
 
 ### Installing Analysis Dependencies
 
-Add any packages your specific analysis needs in your Code Ocean environment:
-```dockerfile
-# Example additions to Dockerfile for your analysis
-RUN pip install -U --no-cache-dir \
-    scikit-learn==1.3.0 \
-    matplotlib==3.7.1 \
-    seaborn==0.12.0 \
-    your-specific-analysis-package==1.0.0
-```
+Add any packages your specific analysis needs in your Code Ocean environment, ideally using the environment builder interface.
 
 ## Building Your Analysis
 
@@ -95,77 +87,11 @@ RUN pip install -U --no-cache-dir \
 
 The `analysis_dispatch_model.py` file contains three key classes that define your analysis:
 
-1. **`AnalysisSpecification`**: Defines the input parameters your analysis accepts
-2. **`AnalysisOutputs`**: Defines the structure of your analysis results  
-3. **`AnalysisSpecificationCLI`**: Enables command-line parameter parsing (optional)
+1. **`ExampleAnalysisSpecification`**: Defines the input parameters your analysis accepts
+2. **`ExampleAnalysisOutputs`**: Defines the structure of your analysis results  
 
-#### Customizing AnalysisSpecification
+Replace these example schema with one for your analysis parameters, either in this capsule or imported from your analysis package.
 
-Replace the example schema with your analysis parameters:
-
-```python
-from typing import List, Optional, Union
-from aind_data_schema.base import GenericModel
-from pydantic import Field
-from pydantic_settings import BaseSettings
-
-class AnalysisSpecification(GenericModel):
-    """
-    Define ALL parameters your analysis needs.
-    This schema will be used by the job dispatcher and validated automatically.
-    """
-    
-    # Required fields - customize these for your analysis
-    analysis_name: str = Field(..., description="Name identifying your analysis type")
-    analysis_tag: str = Field(..., description="Version/variant tag for organizing results")
-    
-    # Add your analysis-specific parameters here
-    # Examples for different analysis types:
-    
-    # For spike sorting quality analysis:
-    isi_violation_threshold: float = Field(..., description="ISI violation threshold for unit quality")
-    amplitude_cutoff: float = Field(default=0.1, description="Amplitude cutoff for unit filtering")
-    
-    # For behavioral analysis:
-    # reaction_time_window: List[float] = Field(..., description="Time window [start, end] for reaction time analysis")
-    # trial_types: List[str] = Field(..., description="List of trial types to include")
-    
-    # For imaging analysis:
-    # roi_threshold: float = Field(..., description="Threshold for ROI detection")
-    # baseline_frames: int = Field(default=30, description="Number of frames for baseline calculation")
-    
-    # For custom analysis parameters:
-    # custom_param_1: str = Field(..., description="Description of your parameter")
-    # custom_param_2: Optional[int] = Field(default=None, description="Optional parameter")
-
-class AnalysisOutputs(GenericModel):
-    """
-    Define the structure of your analysis results.
-    This ensures consistent output format and enables result querying.
-    """
-    
-    # Add fields that describe your analysis outputs
-    # Examples:
-    
-    # For spike analysis:
-    filtered_units: List[str] = Field(..., description="List of unit IDs that passed filtering")
-    quality_metrics: dict = Field(..., description="Dictionary of quality metrics per unit")
-    
-    # For behavioral analysis:
-    # performance_score: float = Field(..., description="Overall performance score")
-    # trial_success_rate: float = Field(..., description="Percentage of successful trials")
-    
-    # For any analysis:
-    plots_generated: List[str] = Field(default_factory=list, description="List of plot filenames generated")
-    summary_statistics: Optional[dict] = Field(default=None, description="Summary statistics from analysis")
-    
-class AnalysisSpecificationCLI(AnalysisSpecification, BaseSettings, cli_parse_args=True):
-    """
-    Enables command-line parsing of analysis parameters.
-    Only needed if you want to override parameters from command line.
-    """
-    pass
-```
 
 #### Key Guidelines for Schema Design:
 
@@ -178,7 +104,7 @@ class AnalysisSpecificationCLI(AnalysisSpecification, BaseSettings, cli_parse_ar
 
 **Electrophysiology Analysis:**
 ```python
-class AnalysisSpecification(GenericModel):
+class EphysAnalysisSpecification(GenericModel):
     analysis_name: str = Field(..., description="Analysis identifier")
     analysis_tag: str = Field(..., description="Analysis version/variant")
     isi_violations_cutoff: float = Field(..., description="ISI violations threshold (0-1)")
@@ -189,7 +115,7 @@ class AnalysisSpecification(GenericModel):
 
 **Behavioral Analysis:**
 ```python
-class AnalysisSpecification(GenericModel):
+class BehaviorAnalysisSpecification(GenericModel):
     analysis_name: str = Field(..., description="Analysis identifier") 
     analysis_tag: str = Field(..., description="Analysis version/variant")
     response_window: List[float] = Field(..., description="Response window [start, end] in seconds")
@@ -202,7 +128,6 @@ class AnalysisSpecification(GenericModel):
 
 Create an `analysis_parameters.json` file in the `/data/analysis_parameters/` folder. The structure depends on whether you're running a single analysis configuration or multiple variants:
 
-**Choose ONE of these approaches:**
 
 **Option A - Single Analysis (same parameters for all datasets):**
 ```json
@@ -236,176 +161,23 @@ Create an `analysis_parameters.json` file in the `/data/analysis_parameters/` fo
 }
 ```
 
-**Important**: Replace `your_parameter_1`, `your_parameter_2`, etc. with the actual parameter names you defined in your `AnalysisSpecification` schema.
+**Important**: Replace `your_parameter_1`, `your_parameter_2`, etc. with the actual parameter names you defined in your `ExampleAnalysisSpecification` schema.
 ### Step 3: Implement Your Analysis Logic
 
 **This is where you build your actual analysis.** Modify the `run_analysis` function in `analysis_wrapper/run_capsule.py` to implement your specific analysis:
 
-```python
-def run_analysis(analysis_dispatch_inputs: AnalysisDispatchModel, **parameters) -> None:
-    """
-    This is YOUR analysis function - customize it completely for your needs.
-    The framework handles job management, metadata, and result storage.
-    You focus on the science!
-    """
-    
-    # Create processing record (framework handles this)
-    processing = construct_processing_record(analysis_dispatch_inputs, **parameters)
-    
-    # Check if analysis already completed (framework handles this)
-    if docdb_record_exists(processing):
-        logger.info("Record already exists, skipping.")
-        return
-
-    ### REPLACE THIS SECTION WITH YOUR ANALYSIS CODE ###
-    
-    # Initialize results structure
-    analysis_results = {}
-    plots_created = []
-    
-    # Process each data file
-    for i, location in enumerate(analysis_dispatch_inputs.file_location):
-        logger.info(f"Processing file {i+1}/{len(analysis_dispatch_inputs.file_location)}: {location}")
-        
-        # STEP 1: Load your data
-        # Replace this with your data loading logic
-        # Examples:
-        # - For NWB files: with NWBHDF5IO(location, 'r') as io: nwbfile = io.read()
-        # - For other formats: data = your_custom_loader(location)
-        
-        try:
-            # Example for NWB files (replace with your data loading)
-            with NWBZarrIO(location, 'r') as io:
-                nwbfile = io.read()
-            
-            # STEP 2: Run your analysis
-            # Replace this with your analysis logic
-            result = your_analysis_function(
-                nwbfile,
-                parameter_1=parameters['your_parameter_1'],
-                parameter_2=parameters['your_parameter_2']
-                # Add all parameters from your AnalysisSpecification
-            )
-            
-            # STEP 3: Store results
-            analysis_results[location] = result
-            
-            # STEP 4: Generate plots/visualizations (optional)
-            plot_filename = f'analysis_plot_{i}.png'
-            your_plotting_function(result, f'/results/{plot_filename}')
-            plots_created.append(plot_filename)
-            
-        except Exception as e:
-            logger.error(f"Failed to process {location}: {str(e)}")
-            # Decide how to handle errors - continue or stop
-            continue  # or raise e to stop processing
-    
-    # STEP 5: Save summary results
-    # Save your results in whatever format makes sense
-    results_file = '/results/analysis_summary.json'
-    with open(results_file, 'w') as f:
-        json.dump(analysis_results, f, indent=2, default=str)
-    
-    # STEP 6: Create structured outputs (must match your AnalysisOutputs schema)
-    processing.output_parameters = AnalysisOutputs(
-        # Replace these with your actual output fields
-        filtered_units=list(analysis_results.keys()),  # Example
-        quality_metrics={"processed_files": len(analysis_results)},  # Example
-        plots_generated=plots_created,
-        summary_statistics={"total_processed": len(analysis_results)}
-    )
-    
-    # Framework handles saving to S3 and database
-    write_results_and_metadata(processing, ANALYSIS_BUCKET)
-    logger.info("Successfully wrote record to docdb and s3")
-
-# ADD YOUR CUSTOM ANALYSIS FUNCTIONS HERE
-def your_analysis_function(data, parameter_1, parameter_2, **kwargs):
-    """
-    Implement your specific analysis logic here.
-    
-    Args:
-        data: Your loaded data (NWB file, DataFrame, etc.)
-        parameter_1, parameter_2: Parameters from your AnalysisSpecification
-        **kwargs: Any additional parameters
-    
-    Returns:
-        Your analysis results in whatever format you need
-    """
-    # Your analysis code here
-    # Examples:
-    # - Spike train analysis
-    # - Behavioral metric calculation  
-    # - Image processing
-    # - Machine learning model fitting
-    
-    result = {
-        "analysis_output": "your_results_here",
-        "metrics": {"metric1": 0.5, "metric2": 0.8},
-        "processed_timestamp": datetime.now().isoformat()
-    }
-    
-    return result
-
-def your_plotting_function(results, output_path):
-    """
-    Create visualizations of your results.
-    
-    Args:
-        results: Output from your_analysis_function
-        output_path: Where to save the plot
-    """
-    import matplotlib.pyplot as plt
-    
-    # Your plotting code here
-    fig, ax = plt.subplots(1, 1, figsize=(10, 6))
-    # Create your plots...
-    ax.plot([1, 2, 3], [1, 4, 2])  # Replace with your plotting logic
-    ax.set_title("Your Analysis Results")
-    
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    plt.close()
-```
 
 #### Key Points for Implementation:
 
 1. **Focus on the science**: The framework handles job management, metadata, and storage
-2. **Use your schema**: All parameters from your `AnalysisSpecification` are available in the `parameters` dict
+2. **Use your schema**: All parameters from your `ExampleAnalysisSpecification` are available in the `parameters` dict
 3. **Handle errors gracefully**: Decide whether to continue or stop on individual file failures
 4. **Save intermediate results**: Use `/results/` directory for all output files
-5. **Match your output schema**: Ensure `AnalysisOutputs` matches what you actually produce
+5. **Match your output schema**: Ensure `ExampleAnalysisOutputs` matches what you actually produce
 
 ### Step 4: Test Your Analysis
 
-Before running on real data, test your analysis locally:
-
-```bash
-# In your duplicated repository
-cd code
-
-# Install dependencies  
-pip install -e .
-
-# Create test data that matches your schema
-mkdir -p /data/job_dict
-mkdir -p /data/analysis_parameters
-
-# Create a test job input model
-echo '{"s3_location": ["test"], "asset_id": ["test"], "file_location": ["path/to/test/file"]}' > /data/job_dict/test.json
-
-# Create test parameters using YOUR schema
-echo '{
-    "analysis_parameter": {
-        "analysis_name": "test_analysis",
-        "analysis_tag": "test_run",
-        "your_parameter_1": 0.05,
-        "your_parameter_2": "test_value"
-    }
-}' > /data/analysis_parameters/analysis_parameters.json
-
-# Run your analysis
-python -m analysis_wrapper.run_capsule
-```
+Before running in a pipeline, test via a reproducible run of the wrapper capsule.
 
 ## Understanding the Framework Components
 
@@ -413,7 +185,7 @@ This template provides several key components that you can build upon:
 
 ### Core Files You Should Modify:
 
-1. **`analysis_wrapper/analysis_dispatch_model.py`** - Define your analysis schema (REQUIRED)
+1. **`analysis_wrapper/example_analysis_model.py`** - Define your analysis schema (REQUIRED)
 2. **`analysis_wrapper/run_capsule.py`** - Implement your analysis logic (REQUIRED)  
 3. **`environment/`** - Add your analysis dependencies (LIKELY NEEDED)
 
@@ -437,17 +209,12 @@ The following features are provided by the framework and work automatically:
 
 ### Automatic Parameter Parsing
 
-The framework automatically parses parameters from your analysis_parameters.json file. You can also enable command-line parsing:
+The framework automatically parses parameters from your analysis_parameters.json file and from the command line or app builder.
 
-```python
-# Uncomment this section in run_capsule.py
-if analysis_specs is None:
-    analysis_specs = AnalysisSpecificationCLI().model_dump_json()
-```
 
 ### Automatic Batch Processing
 
-The framework automatically processes all job models found in `/data/job_dict/`. You don't need to modify this:
+The framework automatically processes all job models found in `/data/job_dict/` in series. You don't need to modify this:
 
 ```python
 input_model_paths = tuple(utils.DATA_PATH.glob('job_dict/*'))
@@ -488,7 +255,7 @@ The following features work automatically - you don't need to implement them:
 - Error messages captured and stored with results
 
 ### ✅ Parameter Validation
-- Your `AnalysisSpecification` schema automatically validates input parameters
+- Your `ExampleAnalysisSpecification` schema automatically validates input parameters
 - Clear error messages for invalid parameters
 
 ## Integration with Analysis Pipeline
@@ -505,7 +272,7 @@ See the [pipeline template](https://github.com/AllenNeuralDynamics/aind-analysis
 
 ### Common Issues When Building Your Analysis
 
-**Schema validation errors**: Check that your `AnalysisSpecification` matches your parameter files exactly
+**Schema validation errors**: Check that your `ExampleAnalysisSpecification` matches your parameter files exactly
 **Import errors**: Add missing packages to your environment configuration
 **File loading errors**: Ensure your data loading code handles the file formats in your datasets
 **Memory issues**: Consider processing data in chunks for large datasets
@@ -527,49 +294,6 @@ def run_analysis(analysis_dispatch_inputs: AnalysisDispatchModel, **parameters) 
         # Your analysis code...
 ```
 
-Test your schema and outputs:
-```python
-# Test your schema validation
-from your_analysis_wrapper.analysis_dispatch_model import AnalysisSpecification, AnalysisOutputs
-
-# Validate your parameters
-params = {"analysis_name": "test", "your_param": 0.05}
-spec = AnalysisSpecification(**params)  # Should not raise errors
-
-# Test your outputs structure  
-outputs = AnalysisOutputs(your_output_field="test_value")
-```
-
-## Development and Testing
-
-### Local Development of Your Analysis
-
-```bash
-# Clone YOUR duplicated repository
-git clone <your-analysis-repository-url>
-cd your-analysis-wrapper/code
-
-# Install in development mode
-pip install -e .
-
-# Create test data matching YOUR schema
-mkdir -p /data/job_dict /data/analysis_parameters
-
-# Test with minimal data
-echo '{"s3_location": ["test"], "asset_id": ["test"], "file_location": ["path/to/test/file"]}' > /data/job_dict/test.json
-
-# Use YOUR analysis parameters
-echo '{
-    "analysis_parameter": {
-        "analysis_name": "test", 
-        "analysis_tag": "test_run",
-        "your_custom_parameter": "test_value"
-    }
-}' > /data/analysis_parameters/analysis_parameters.json
-
-# Run YOUR analysis
-python -m analysis_wrapper.run_capsule
-```
 
 ## Additional Resources for Building Your Analysis
 
@@ -585,6 +309,6 @@ When building your analysis:
 1. **Start simple**: Begin with a minimal analysis and gradually add complexity
 2. **Test locally**: Always test your analysis with sample data before deploying  
 3. **Use the examples**: The provided examples show common patterns for different analysis types
-4. **Check the schema**: Ensure your `AnalysisSpecification` and `AnalysisOutputs` match your implementation
+4. **Check the schema**: Ensure your `ExampleAnalysisSpecification` and `ExampleAnalysisOutputs` match your implementation
 
 Remember: **This repository is your starting point, not your final destination.** Build your analysis, make it your own, and contribute back to the community by sharing your analysis patterns and approaches!
