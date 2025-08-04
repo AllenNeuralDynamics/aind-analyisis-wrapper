@@ -28,7 +28,7 @@ To help facilitate tracking of analysis parameters for reproducibility, a user s
 
 1. Start by renaming the example analysis model to match user's custom model.
 2. Then add any fields that need to be kept track of. **The listed fields are just examples, not a requirement**. ***Recommended to add a field to tag the version of analysis run***. See [Analysis Metadata Tracking](#analysis-metadata-tracking).
-3. Additionally, for any small numerical outputs and such - define these in the output model if needed. Larger files such as arrays and tables should be written to the results folde (See next section).
+3. Additionally, for any small numerical outputs and such - define these in the output model if needed. Larger files such as arrays and tables should be written to the results folder (See next section).
 4. Once this is done, be sure to replace **all references to `ExampleAnalysisSpecification` and `ExampleAnalysisOutputs`** in `run_capsule.py`. If no output model is needed, remove lines **38-43** in `run_capsule.py`.
 
 ### Running Analysis and Storing Output
