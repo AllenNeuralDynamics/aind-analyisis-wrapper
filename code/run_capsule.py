@@ -8,8 +8,8 @@ from analysis_pipeline_utils.metadata import (construct_processing_record,
                                               docdb_record_exists,
                                               write_results_and_metadata)
 
-import analysis_wrapper.utils as utils
-from analysis_wrapper.example_analysis_model import (
+import utils
+from example_analysis_model import (
     ExampleAnalysisOutputs, ExampleAnalysisSpecification)
 
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
