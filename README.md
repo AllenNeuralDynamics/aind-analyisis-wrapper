@@ -59,4 +59,4 @@ To intentionally rerun the **same** analysis on the same data:
 - **Not required** but adding a versioning field in the user defined pydantic model is **strongly recommended** for reproducibility and distinguishing between analysis runs.
 
 ### Testing Analysis Wrapper
-To test, a reproducible run can be executed. **Be sure to set the dry run flag in the app panel to 1 so the results are not posted**.
+To test, a reproducible run can be executed. **When ready to run analysis and post results, be sure to set the dry run flag in the app panel to 0 so the results are posted. By default, dry run is enabled.**.
