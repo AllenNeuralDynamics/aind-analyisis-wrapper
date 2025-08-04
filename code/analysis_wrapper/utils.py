@@ -6,10 +6,9 @@ from pathlib import Path
 from typing import Any, ClassVar, Optional, Type, TypeVar, Union
 
 from aind_data_schema.base import GenericModel
-from analysis_pipeline_utils.analysis_dispatch_model import (
-    AnalysisDispatchModel,
-)
-from pydantic import create_model, Field
+from analysis_pipeline_utils.analysis_dispatch_model import \
+    AnalysisDispatchModel
+from pydantic import Field, create_model
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 logging.basicConfig(
@@ -45,9 +44,9 @@ def make_cli_model(model_cls: Type[T]) -> Type[BaseSettings]:
     )
 
     class CLIModel(BaseSettings, optional_model):  # type: ignore
-        dry_run: bool = Field(
-            default=True,
-            description="Run without posting results.",
+        dry_run: int = Field(
+            default=1,
+            description="Run without posting results if set to 1.",
             exclude=True,  # this prevents it from being merged
         )
         input_directory: Path = Field(

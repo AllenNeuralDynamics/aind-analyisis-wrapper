@@ -2,20 +2,15 @@ import json
 import logging
 import os
 
-from analysis_pipeline_utils.analysis_dispatch_model import (
-    AnalysisDispatchModel,
-)
-from analysis_pipeline_utils.metadata import (
-    construct_processing_record,
-    docdb_record_exists,
-    write_results_and_metadata,
-)
+from analysis_pipeline_utils.analysis_dispatch_model import \
+    AnalysisDispatchModel
+from analysis_pipeline_utils.metadata import (construct_processing_record,
+                                              docdb_record_exists,
+                                              write_results_and_metadata)
 
 import analysis_wrapper.utils as utils
 from analysis_wrapper.example_analysis_model import (
-    ExampleAnalysisOutputs,
-    ExampleAnalysisSpecification,
-)
+    ExampleAnalysisOutputs, ExampleAnalysisSpecification)
 
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
 logger = logging.getLogger(__name__)
@@ -85,7 +80,7 @@ if __name__ == "__main__":
 
     cli_cls = utils.make_cli_model(ExampleAnalysisSpecification)
     cli_model = cli_cls()
-
+    logger.info(f"Command line args {cli_model.model_dump()}")
     input_model_paths = tuple(cli_model.input_directory.glob("job_dict/*"))
     logger.info(
         f"Found {len(input_model_paths)} input job models to run analysis on."
@@ -109,6 +104,6 @@ if __name__ == "__main__":
         logger.info(f"Running with analysis specs {analysis_specification}")
         run_analysis(
             analysis_dispatch_inputs,
-            cli_model.dry_run,
+            bool(cli_model.dry_run),
             **analysis_specification,
         )
