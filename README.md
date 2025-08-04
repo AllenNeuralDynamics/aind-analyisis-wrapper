@@ -53,10 +53,10 @@ This framework automatically tracks completed analyses using a metadata record t
 
 If all of these are the same, the system will **skip re-running** the analysis to avoid duplicate processing.
 
-If you modify your analysis parameters or code, the system will consider it a **different analysis** and run it normally **after it has been committed**.
+If you modify your analysis parameters or code, the system will consider it a **different record** and run it normally **after it has been committed**.
 
 To intentionally rerun the **same** analysis on the same data:
-- Ensure that **at least one part of the metadata record changes** — this could be a parameter value, a version label, or a comment field in your input model.
+- Ensure that **at least one part of the metadata record changes** — this could be a version label, or a code comment.
 - **Not required** but adding a versioning field is **strongly recommended** for transparency, reproducibility, and distinguishing between analysis runs.
 
 ### Testing Analysis Wrapper
