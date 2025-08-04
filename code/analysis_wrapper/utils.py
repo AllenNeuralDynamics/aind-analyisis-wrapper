@@ -45,6 +45,16 @@ def make_cli_model(model_cls: Type[T]) -> Type[BaseSettings]:
     )
 
     class CLIModel(BaseSettings, optional_model):  # type: ignore
+        dry_run: bool = Field(
+            default=True,
+            description="Run without posting results.",
+            exclude=True  # this prevents it from being merged
+        )
+        input_directory: Path = Field(
+            default = Path("/data"),
+            description = "Input directory",
+            exclude=True
+        )
         model_config: ClassVar[SettingsConfigDict] = {
             "cli_parse_args": True,
         }
@@ -110,7 +120,7 @@ def _get_merged_analysis_parameters(
 
 def get_analysis_model_parameters(
     analysis_dispatch_inputs: AnalysisDispatchModel,
-    analysis_model: GenericModel,
+    cli_model: BaseSettings,
     analysis_parameters_json_path: Union[Path, None] = None,
 ) -> dict[str, Any]:
     """
@@ -121,8 +131,8 @@ def get_analysis_model_parameters(
     analysis_dispatch_inputs: AnalysisDispatchModel
         The input model with data information for analysis to be run on
 
-    analysis_model: GenericModel
-        The analysis model with user defined parameters
+    cli_model: BaseSettings
+        The analysis model with cli user defined parameters
         
     analysis_parameters_json_path: Union[Path, None] = None
         The path to analysis_parameters.json file
@@ -153,8 +163,7 @@ def get_analysis_model_parameters(
     else:
         fixed_parameters_model = {}
 
-    cli_model = make_cli_model(analysis_model)
-    cli_parameters_model = cli_model().model_dump()
+    cli_parameters_model = cli_model.model_dump()
     logger.info(f"Command line parameters {cli_parameters_model}")
     if analysis_dispatch_inputs.distributed_parameters:
         distributed_parameters = (

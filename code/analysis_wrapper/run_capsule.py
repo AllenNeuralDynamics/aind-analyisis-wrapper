@@ -8,14 +8,30 @@ from analysis_pipeline_utils.analysis_dispatch_model import AnalysisDispatchMode
 import analysis_wrapper.utils as utils
 from analysis_wrapper.example_analysis_model import ExampleAnalysisSpecification, ExampleAnalysisOutputs
 
-DATA_PATH = Path("/data")  # TODO: don't hardcode
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
 logger = logging.getLogger(__name__)
 
 
 def run_analysis(
-    analysis_dispatch_inputs: AnalysisDispatchModel, **parameters
+    analysis_dispatch_inputs: AnalysisDispatchModel, dry_run: bool = True, **parameters,
 ) -> None:
+    """
+    Runs the analysis
+
+    Parameters
+    ----------
+    analysis_dispatch_inputs: AnalysisDispatchModel
+        The input model with input data 
+        from dispatcher
+    
+    dry_run: bool, Default True
+        Dry run of analysis. If true,
+        does not post results
+
+    parameters
+        The analysis model parameters
+    
+    """
     processing = construct_processing_record(
         analysis_dispatch_inputs, **parameters
     )
@@ -41,8 +57,13 @@ def run_analysis(
             "This is an example of additional information about the analysis."
         )[0],
     )
-    write_results_and_metadata(processing, ANALYSIS_BUCKET)
-    logger.info("Successfully wrote record to docdb and s3")
+
+    if not dry_run:
+        logger.info("Running analysis and posting results")
+        write_results_and_metadata(processing, ANALYSIS_BUCKET)
+        logger.info("Successfully wrote record to docdb and s3")
+    else:
+        logger.info("Dry run complete. Results not posted")
 
 
 # Most of the below code will not need to change per-analysis
@@ -57,17 +78,20 @@ if __name__ == "__main__":
         f"Found {len(input_model_paths)} input job models to run analysis on."
     )
 
+    cli_cls = make_cli_model(ExampleAnalysisSpecification)
+    cli_model = cli_cls()
+
     for model_path in input_model_paths:
         with open(model_path, "r") as f:
             analysis_dispatch_inputs = AnalysisDispatchModel.model_validate(
                 json.load(f)
             )
         merged_parameters = utils.get_analysis_model_parameters(
-             analysis_dispatch_inputs, ExampleAnalysisSpecification, 
-             analysis_parameters_json_path=DATA_PATH / "analysis_parameters.json"
+             analysis_dispatch_inputs, cli_model, 
+             analysis_parameters_json_path=cli_model.input_directory / "analysis_parameters.json"
         )
         analysis_specification = ExampleAnalysisSpecification.model_validate(
             merged_parameters
         ).model_dump()
         logger.info(f"Running with analysis specs {analysis_specification}")
-        run_analysis(analysis_dispatch_inputs, **analysis_specification)
+        run_analysis(analysis_dispatch_inputs, **analysis_specification, cli_model.dry_run)
