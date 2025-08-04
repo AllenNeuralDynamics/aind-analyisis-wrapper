@@ -20,7 +20,8 @@ The steps below are needed to configure the analysis wrapper. Go to the `environ
 1. Set the **`DOCDB_COLLECTION`** to the project collection
 2. Set the **`CODEOCEAN_EMAIL`** 
 3. Replace the **`ANALYSIS_BUCKET`** with the path to the analysis bucket on S3.
-4. Set the corresponding secrets. Users will have to make a codeocean token - **read** permissions are sufficient for this. See [creating token](https://docs.codeocean.com/user-guide/code-ocean-api/authentication#to-create-an-access-token) docs for more information
+4. Set the corresponding secrets. Users will have to make a codeocean token - **read** permissions are sufficient for this. See [creating token](https://docs.codeocean.com/user-guide/code-ocean-api/authentication#to-create-an-access-token) docs for more information.
+5. Add any required packages needed for analysis
 
 ### Analysis Wrapper - User Defined Analysis Parameters
 To help facilitate tracking of analysis parameters, a user should define their own pydantic model in the analysis wrapper. Follow steps below. An example can be found in `/code/example_analysis_model.py`:
@@ -29,7 +30,6 @@ To help facilitate tracking of analysis parameters, a user should define their o
 2. Then add any fields that need to be kept track of. **The listed fields are just examples, not a requirement**. ***Recommended to add a field to tag the version of analysis run***.
 3. Additionally, for any small numerical outputs and such - define these in the output model if needed.
 4. Once this is done, be sure to change lines **9, 38 66, and 69** in `/code/run_capsule.py` to the user defined model, and user defined output model respectively (replace references to **`example analysis`**). If no output model is needed, remove lines **38-43** in `run_capsule.py`.
-5. Add any required packages needed for analysis
 
 ### Running Analysis and Storing Output
 User defined analysis can be specified in the **`run_analysis`** function in `run_capsule.py`. An example of the input model passed in can be found in `/data/job_dict`. An example of analysis parameters that correspond to the example pydantic model can be found in `/data/analysis_parameters.json`. Modify the analysis parameters json for testing if needed, and **make sure the fields match those in the model defined**.
