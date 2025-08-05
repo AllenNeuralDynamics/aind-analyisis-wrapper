@@ -7,13 +7,11 @@ from analysis_pipeline_utils.analysis_dispatch_model import \
 from analysis_pipeline_utils.metadata import (construct_processing_record,
                                               docdb_record_exists,
                                               write_results_and_metadata)
+from analysis_pipeline_utils.utils_analysis_wrapper import (
+    get_analysis_model_parameters, make_cli_model)
 
-from analysis_pipeline_utils.utils_analysis_wrapper import(
-    get_analysis_model_parameters,
-    make_cli_model
-)
-from example_analysis_model import (
-    ExampleAnalysisOutputs, ExampleAnalysisSpecification)
+from example_analysis_model import (ExampleAnalysisOutputs,
+                                    ExampleAnalysisSpecification)
 
 ANALYSIS_BUCKET = os.getenv("ANALYSIS_BUCKET")
 logger = logging.getLogger(__name__)
