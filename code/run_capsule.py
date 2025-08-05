@@ -8,7 +8,10 @@ from analysis_pipeline_utils.metadata import (construct_processing_record,
                                               docdb_record_exists,
                                               write_results_and_metadata)
 
-import utils
+from analysis_pipeline_utils.utils_analysis_wrapper import(
+    get_analysis_model_parameters,
+    make_cli_model
+)
 from example_analysis_model import (
     ExampleAnalysisOutputs, ExampleAnalysisSpecification)
 
@@ -78,7 +81,7 @@ if __name__ == "__main__":
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
-    cli_cls = utils.make_cli_model(ExampleAnalysisSpecification)
+    cli_cls = make_cli_model(ExampleAnalysisSpecification)
     cli_model = cli_cls()
     logger.info(f"Command line args {cli_model.model_dump()}")
     input_model_paths = tuple(cli_model.input_directory.glob("job_dict/*"))
@@ -91,7 +94,7 @@ if __name__ == "__main__":
             analysis_dispatch_inputs = AnalysisDispatchModel.model_validate(
                 json.load(f)
             )
-        merged_parameters = utils.get_analysis_model_parameters(
+        merged_parameters = get_analysis_model_parameters(
             analysis_dispatch_inputs,
             cli_model,
             ExampleAnalysisSpecification,
