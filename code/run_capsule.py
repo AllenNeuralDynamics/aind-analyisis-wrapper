@@ -48,7 +48,7 @@ def run_analysis(
 
     # Execute analysis and write to results folder
     # using the passed parameters
-    # SEE EXAMPLE BELOW
+    # Example:
     # Use NWBZarrIO to reads
     # for location in analysis_dispatch_inputs.file_location:
     #     with NWBZarrIO(location, 'r') as io:
@@ -72,8 +72,6 @@ def run_analysis(
         logger.info("Dry run complete. Results not posted")
 
 
-# Most of the below code will not need to change per-analysis
-# and will be moved to a shared library
 if __name__ == "__main__":
     logging.basicConfig(
         level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
